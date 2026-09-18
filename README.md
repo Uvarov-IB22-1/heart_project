@@ -1,5 +1,7 @@
 # Heart Project
 
+Использованный датасет: https://www.kaggle.com/datasets/fedesoriano/heart-failure-prediction
+
 Инструкция по настройке окружения и началу работы над проектом.
 
 ## 1. Клонирование репозитория
