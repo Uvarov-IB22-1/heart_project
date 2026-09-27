@@ -29,9 +29,7 @@ def train_models(X_train, y_train, random_state: int = 42) -> dict:
 
     models = {
         "LogReg": LogisticRegression(max_iter=1000, random_state=random_state),
-        "RandomForest": RandomForestClassifier(
-            n_estimators=100, random_state=random_state
-        ),
+        "RandomForest": RandomForestClassifier(n_estimators=100, random_state=random_state),
         "CatBoost": CatBoostClassifier(
             iterations=200,
             depth=4,
