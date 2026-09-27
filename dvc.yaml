@@ -1,0 +1,45 @@
+stages:
+  synthetic:
+    cmd: python -m scripts.run_synthetic
+    deps:
+      - data/heart.csv
+      - src/synthetic.py
+      - scripts/run_synthetic.py
+    outs:
+      - data/heart_synth.csv
+
+  prepare:
+    cmd: python -m scripts.run_prepare
+    deps:
+      - data/heart_synth.csv
+      - src/preprocessing.py
+      - scripts/run_prepare.py
+    outs:
+      - data/processed/X_train.csv
+      - data/processed/X_test.csv
+      - data/processed/y_train.csv
+      - data/processed/y_test.csv
+      - data/processed/medians.csv
+      - data/processed/scaler.csv
+
+  train:
+    cmd: python -m scripts.run_train
+    deps:
+      - data/processed/X_train.csv
+      - data/processed/y_train.csv
+      - src/train.py
+      - scripts/run_train.py
+    outs:
+      - models/model.pkl
+
+  evaluate:
+    cmd: python -m scripts.run_evaluate
+    deps:
+      - models/model.pkl
+      - data/processed/X_test.csv
+      - data/processed/y_test.csv
+      - src/evaluate.py
+      - scripts/run_evaluate.py
+    metrics:
+      - metrics.json:
+          cache: false
