@@ -195,3 +195,4 @@ websocket-client==1.9.2
 xgboost==3.4.1
 yarl==1.25.1
 zc.lockfile==4.0
+pytest==8.4.2
