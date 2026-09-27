@@ -45,10 +45,7 @@ def compute_medians(X_train: pd.DataFrame) -> dict:
     Важно: вызывается только на train, чтобы test не участвовал
     в вычислении статистики (иначе — утечка данных).
     """
-    return {
-        col: X_train[col].replace(0, np.nan).median()
-        for col in ZERO_AS_MISSING_COLS
-    }
+    return {col: X_train[col].replace(0, np.nan).median() for col in ZERO_AS_MISSING_COLS}
 
 
 def clean(part: pd.DataFrame, medians: dict) -> pd.DataFrame:
@@ -147,9 +144,7 @@ def save_processed(X_train, X_test, y_train, y_test, medians, scaler, save_dir: 
     y_test.to_csv(out / "y_test.csv", index=False)
 
     pd.Series(medians, name="median").to_csv(out / "medians.csv")
-    pd.DataFrame(
-        {"mean": scaler.mean_, "scale": scaler.scale_}, index=NUMERIC_COLS
-    ).to_csv(out / "scaler.csv")
+    pd.DataFrame({"mean": scaler.mean_, "scale": scaler.scale_}, index=NUMERIC_COLS).to_csv(out / "scaler.csv")
 
 
 def load_processed(save_dir: str):

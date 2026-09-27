@@ -10,6 +10,8 @@
 Запуск: pytest tests/ -v   (из корня heart_project)
 """
 
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -148,7 +150,7 @@ def test_prepare_data_clean_step_clips_oldpeak(tmp_path):
     (это уже не "секунды ST-депрессии", а "число стандартных отклонений").
     Поэтому здесь читаем CSV и проверяем clean() напрямую, до масштабирования.
     """
-    df = pd.read_csv(csv_path := _make_synthetic_csv(tmp_path, n=200))
+    df = pd.read_csv(_make_synthetic_csv(tmp_path, n=200))
     X = df.drop(columns="HeartDisease")
     medians = compute_medians(X)
     cleaned = clean(X, medians)
@@ -176,7 +178,7 @@ def test_prepare_data_saves_processed_files(tmp_path):
 # ---------- вспомогательное ----------
 
 
-def _make_synthetic_csv(tmp_path, n: int = 200) -> "os.PathLike":
+def _make_synthetic_csv(tmp_path, n: int = 200) -> Path:
     """Генерирует небольшой валидный CSV с той же схемой, что и
     heart_synth.csv, включая немного нулей/отрицательных Oldpeak —
     чтобы prepare_data() было на чём отработать очистку."""
@@ -187,9 +189,7 @@ def _make_synthetic_csv(tmp_path, n: int = 200) -> "os.PathLike":
             "Sex": rng.choice(["M", "F"], n),
             "ChestPainType": rng.choice(["ATA", "NAP", "ASY", "TA"], n),
             "RestingBP": rng.integers(90, 180, n),
-            "Cholesterol": rng.choice(
-                [0] + list(range(150, 350)), n
-            ),  # немного нулей
+            "Cholesterol": rng.choice([0] + list(range(150, 350)), n),  # немного нулей
             "FastingBS": rng.integers(0, 2, n),
             "RestingECG": rng.choice(["Normal", "ST", "LVH"], n),
             "MaxHR": rng.integers(80, 200, n),
