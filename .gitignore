@@ -2,4 +2,6 @@
 __pycache__/
 trash/
 notebooks/.ipynb_checkpoints/
-notebooks/catboost_info/.DS_Store
+notebooks/catboost_info/
+.pytest_cache/
+.DS_Store
