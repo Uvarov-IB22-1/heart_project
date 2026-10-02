@@ -47,8 +47,6 @@ def test_compute_medians_ignores_zeros(raw_part):
     assert medians["Cholesterol"] == 195
 
 
-
-
 def test_clean_removes_zeros(raw_part, medians):
     """После clean() в Cholesterol/RestingBP не должно остаться нулей"""
     result = clean(raw_part, medians)
@@ -77,7 +75,6 @@ def test_clean_does_not_mutate_input(raw_part, medians):
     original = raw_part.copy()
     clean(raw_part, medians)
     pd.testing.assert_frame_equal(raw_part, original)
-
 
 
 def test_encode_produces_only_numeric_columns(raw_part, medians):
