@@ -2,8 +2,8 @@
 
 Запуск (из корня heart_project): python -m scripts.run_train
 
-Обучает и тюнингует RandomForest через GridSearchCV (src.train.tune_rf) —
-это финальная модель проекта — и сохраняет её через joblib.
+Обучает и тюнингует RandomForest через GridSearchCV (src.train.tune_rf) -
+это финальная модель проекта - и сохраняет её через joblib.
 """
 
 from src.preprocessing import load_processed

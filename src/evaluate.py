@@ -1,7 +1,7 @@
 """
-Оценка моделей для heart_project (п. 1.b.vi, 1.b.vii методички).
+Оценка моделей для heart_project.
 
-Содержит:
+Метрики:
   - evaluate: таблица метрик (Accuracy, Precision, Recall, F1, ROC-AUC);
   - plot_confusion_matrix: матрица ошибок;
   - plot_feature_importance: важность признаков (только для деревьев).
@@ -21,10 +21,10 @@ from sklearn.metrics import (
 
 
 def evaluate(models: dict, X_test, y_test) -> pd.DataFrame:
-    """Считает метрики на тесте для каждой модели из словаря {имя: модель}.
+    """Считает метрики на тесте для каждой модели из словаря {имя: модель}
 
-    Медицински важные метрики — Recall и F1, а не только Accuracy:
-    пропустить больного (FN) опаснее ложной тревоги (FP).
+    Медицински важные метрики - Recall и F1,
+    так как пропустить больного (FN) опаснее ложноположительного результата (FP)
     """
     rows = []
     for name, model in models.items():
@@ -44,7 +44,7 @@ def evaluate(models: dict, X_test, y_test) -> pd.DataFrame:
 
 
 def plot_confusion_matrix(model, X_test, y_test, title: str = "Матрица ошибок"):
-    """Строит матрицу ошибок для одной модели."""
+    """Строит матрицу ошибок для одной модели"""
     cm = confusion_matrix(y_test, model.predict(X_test))
     ConfusionMatrixDisplay(cm).plot(cmap="Blues")
     plt.title(title)
@@ -52,11 +52,7 @@ def plot_confusion_matrix(model, X_test, y_test, title: str = "Матрица о
 
 
 def plot_feature_importance(model, feature_names, top_n: int = None):
-    """Строит горизонтальный барчарт важности признаков.
-
-    Работает только для моделей с атрибутом feature_importances_
-    (RandomForest, CatBoost и т.п.) — для LogReg используйте coef_.
-    """
+    """Строит столбчатую диаграмму важности признаков"""
     importances = pd.Series(model.feature_importances_, index=feature_names)
     importances = importances.sort_values(ascending=True)
     if top_n:

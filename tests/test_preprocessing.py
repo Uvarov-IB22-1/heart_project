@@ -1,11 +1,5 @@
 """
-Тесты для src/preprocessing.py (Этап 3, п. 4.b методички).
-
-Проверяем не "правильность с медицинской точки зрения", а КОНТРАКТ каждой
-функции — то, что она гарантирует на выходе при любых допустимых входных
-данных. Это и есть страховка DevOps-роли: если кто-то (в том числе сам
-автор) случайно сломает логику при следующей правке src/preprocessing.py,
-эти тесты упадут раньше, чем баг доедет до models.ipynb или до защиты проекта.
+Тесты для src/preprocessing.py.
 
 Запуск: pytest tests/ -v   (из корня heart_project)
 """
@@ -21,16 +15,16 @@ from src.preprocessing import clean, compute_medians, encode, prepare_data
 
 @pytest.fixture
 def raw_part() -> pd.DataFrame:
-    """Маленький, но реалистичный кусок данных с проблемами, которые
-    и должна чинить clean(): нули в Cholesterol/RestingBP (скрытые
+    """Реалистичный кусок данных с проблемами, которые
+    должна чинить clean(): нули в Cholesterol/RestingBP (скрытые
     пропуски) и отрицательный Oldpeak (ошибка измерения)."""
     return pd.DataFrame(
         {
             "Age": [40, 49, 37, 54],
             "Sex": ["M", "F", "M", "M"],
             "ChestPainType": ["ATA", "NAP", "ATA", "ASY"],
-            "RestingBP": [140, 0, 130, 150],  # один явный нуль
-            "Cholesterol": [289, 180, 0, 195],  # один явный нуль
+            "RestingBP": [140, 0, 130, 150],  # один явный 0
+            "Cholesterol": [289, 180, 0, 195],  # один явный 0
             "FastingBS": [0, 0, 0, 1],
             "RestingECG": ["Normal", "Normal", "ST", "Normal"],
             "MaxHR": [172, 156, 98, 122],
@@ -46,11 +40,8 @@ def medians(raw_part) -> dict:
     return compute_medians(raw_part)
 
 
-# ---------- compute_medians ----------
-
-
 def test_compute_medians_ignores_zeros(raw_part):
-    """Нули не должны попадать в расчёт медианы — иначе медиана будет
+    """Нули не должны попадать в расчёт медианы - иначе медиана будет
     занижена самими же пропусками, которые она призвана исправлять."""
     medians = compute_medians(raw_part)
     # RestingBP без нуля: [140, 130, 150] -> медиана 140
@@ -63,7 +54,7 @@ def test_compute_medians_ignores_zeros(raw_part):
 
 
 def test_clean_removes_zeros(raw_part, medians):
-    """После clean() в Cholesterol/RestingBP не должно остаться нулей —
+    """После clean() в Cholesterol/RestingBP не должно остаться нулей -
     это и есть контракт функции, независимо от того, какая именно
     медиана была посчитана."""
     result = clean(raw_part, medians)
@@ -72,8 +63,7 @@ def test_clean_removes_zeros(raw_part, medians):
 
 
 def test_clean_fills_zero_with_train_median(raw_part, medians):
-    """Проверяем не только "нет нулей", но и что подставляется именно
-    заранее переданная медиана train, а не что-то ещё."""
+    """Проверяем, что подставляется именно заранее переданная медиана train."""
     result = clean(raw_part, medians)
     # строка 1: RestingBP был 0 -> должен стать medians['RestingBP']
     assert result.loc[1, "RestingBP"] == medians["RestingBP"]
@@ -85,24 +75,21 @@ def test_clean_clips_negative_oldpeak(raw_part, medians):
     """Oldpeak < 0 физически невозможен -> после clean() должен быть 0."""
     result = clean(raw_part, medians)
     assert (result["Oldpeak"] >= 0).all()
-    assert result.loc[2, "Oldpeak"] == 0  # было -2.6
+    assert result.loc[2, "Oldpeak"] == 0
 
 
 def test_clean_does_not_mutate_input(raw_part, medians):
-    """clean() должна возвращать копию, а не менять переданный df на
-    месте — иначе повторный вызов на том же объекте даст неожиданный
-    результат (частый источник багов в ноутбуках)."""
+    """clean() должна возвращать копию."""
     original = raw_part.copy()
     clean(raw_part, medians)
     pd.testing.assert_frame_equal(raw_part, original)
 
 
-# ---------- encode ----------
+# encode
 
 
 def test_encode_produces_only_numeric_columns(raw_part, medians):
-    """Контракт encode(): на выходе не должно остаться object/str-колонок —
-    иначе StandardScaler или модель упадут на следующем шаге."""
+    """encode(): на выходе не должно остаться object/str-колонок"""
     cleaned = clean(raw_part, medians)
     result = encode(cleaned)
     assert result.select_dtypes(exclude="number").empty
@@ -116,7 +103,7 @@ def test_encode_binary_columns(raw_part, medians):
 
 
 def test_encode_ordinal_st_slope(raw_part, medians):
-    """ST_Slope — порядковый признак: Up=0, Flat=1, Down=2."""
+    """ST_Slope - порядковый признак: Up=0, Flat=1, Down=2."""
     cleaned = clean(raw_part, medians)
     result = encode(cleaned)
     assert result.loc[0, "ST_Slope"] == 0  # было 'Up'
@@ -127,8 +114,7 @@ def test_encode_ordinal_st_slope(raw_part, medians):
 
 
 def test_prepare_data_no_nan(tmp_path):
-    """После полного пайплайна не должно остаться NaN — ни в train,
-    ни в test (главная проверка из clean.ipynb, п. 2.c)."""
+    """После полного пайплайна не должно остаться NaN - ни в train, ни в test"""
     csv_path = _make_synthetic_csv(tmp_path, n=200)
     X_train, X_test, y_train, y_test, medians, scaler = prepare_data(str(csv_path))
     assert X_train.isna().sum().sum() == 0
@@ -136,18 +122,16 @@ def test_prepare_data_no_nan(tmp_path):
 
 
 def test_prepare_data_train_test_same_columns(tmp_path):
-    """Колонки test должны точно совпадать с train (важно, если в test
-    случайно не попала редкая категория из one-hot кодирования)."""
+    """Колонки test должны точно совпадать с train"""
     csv_path = _make_synthetic_csv(tmp_path, n=200)
     X_train, X_test, *_ = prepare_data(str(csv_path))
     assert list(X_train.columns) == list(X_test.columns)
 
 
 def test_prepare_data_clean_step_clips_oldpeak(tmp_path):
-    """Oldpeak >= 0 — контракт clean(), а не prepare_data() целиком:
+    """Oldpeak >= 0 - контракт clean(), а не prepare_data() целиком:
     после StandardScaler внутри prepare_data() Oldpeak центрируется
-    к среднему и закономерно становится отрицательным у части строк
-    (это уже не "секунды ST-депрессии", а "число стандартных отклонений").
+    к среднему и закономерно становится отрицательным у части строк.
     Поэтому здесь читаем CSV и проверяем clean() напрямую, до масштабирования.
     """
     df = pd.read_csv(_make_synthetic_csv(tmp_path, n=200))
@@ -158,8 +142,7 @@ def test_prepare_data_clean_step_clips_oldpeak(tmp_path):
 
 
 def test_prepare_data_saves_processed_files(tmp_path):
-    """save_dir должен создать все 6 processed-файлов (X/y train/test +
-    medians + scaler) — это то, что читает models.ipynb."""
+    """save_dir должен создать все 6 файлов"""
     csv_path = _make_synthetic_csv(tmp_path, n=200)
     save_dir = tmp_path / "processed"
     prepare_data(str(csv_path), save_dir=str(save_dir))
@@ -175,13 +158,9 @@ def test_prepare_data_saves_processed_files(tmp_path):
     assert expected_files <= {p.name for p in save_dir.iterdir()}
 
 
-# ---------- вспомогательное ----------
-
-
 def _make_synthetic_csv(tmp_path, n: int = 200) -> Path:
     """Генерирует небольшой валидный CSV с той же схемой, что и
-    heart_synth.csv, включая немного нулей/отрицательных Oldpeak —
-    чтобы prepare_data() было на чём отработать очистку."""
+    heart_synth.csv"""
     rng = np.random.default_rng(42)
     df = pd.DataFrame(
         {
