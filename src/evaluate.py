@@ -1,10 +1,5 @@
 """
-Оценка моделей для heart_project.
-
-Метрики:
-  - evaluate: таблица метрик (Accuracy, Precision, Recall, F1, ROC-AUC);
-  - plot_confusion_matrix: матрица ошибок;
-  - plot_feature_importance: важность признаков (только для деревьев).
+Оценка моделей
 """
 
 import matplotlib.pyplot as plt
@@ -21,11 +16,7 @@ from sklearn.metrics import (
 
 
 def evaluate(models: dict, X_test, y_test) -> pd.DataFrame:
-    """Считает метрики на тесте для каждой модели из словаря {имя: модель}
-
-    Медицински важные метрики - Recall и F1,
-    так как пропустить больного (FN) опаснее ложноположительного результата (FP)
-    """
+    """Считает метрики на тесте для каждой модели из словаря имя: модель"""
     rows = []
     for name, model in models.items():
         pred = model.predict(X_test)

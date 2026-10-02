@@ -1,10 +1,5 @@
 """
-Генерация синтетических данных для heart_project.
-
-Логика 1-в-1 повторяет notebooks/synthetic.ipynb: случайные
-записи с повторами + 5% шум по числовым признакам + физические
-ограничения (clip) на диапазоны значений - чтобы результат оставался
-правдоподобным, а не просто зашумлённым.
+Генерация синтетических данных
 """
 
 import numpy as np
@@ -13,7 +8,6 @@ import pandas as pd
 NUMERIC_NOISE_COLS = ["Age", "RestingBP", "Cholesterol", "MaxHR", "Oldpeak"]
 
 # (колонка, min, max) - границы, за которые значения не могут выходить
-# физически, даже после добавления шума
 CLIP_RANGES = {
     "Age": (20, 90),
     "RestingBP": (80, 200),
@@ -29,11 +23,6 @@ def generate_synthetic_data(
     target_size: int = 3000,
     seed: int = 42,
 ) -> pd.DataFrame:
-    """Дополняет датасет до target_size строк через бутстрэп + шум.
-
-    Сохраняет исходные строки как есть и добавляет к ним сгенерированные -
-    оригинальные данные никогда не удаляются и не перезаписываются.
-    """
     np.random.seed(seed)
     df = pd.read_csv(input_path)
     n_to_generate = target_size - len(df)
@@ -45,9 +34,6 @@ def generate_synthetic_data(
     # 1. Берём случайные существующие записи
     boot_idx = np.random.randint(0, len(df), size=n_to_generate)
     synth = df.iloc[boot_idx].reset_index(drop=True)
-
-    # запоминаем, где холестерин был нулём (скрытый пропуск) - шум не
-    # должен превратить осмысленный "пропуск" в случайное число
     zero_chol = synth["Cholesterol"] == 0
 
     # 2. Добавляем шум 5% от std оригинального (не бутстрапнутого) df

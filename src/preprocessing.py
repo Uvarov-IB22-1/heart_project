@@ -1,21 +1,5 @@
 """
-Предобработка данных для heart_project.
-
-Логика 1-в-1 повторяет notebooks/clean.ipynb (ячейки 28-38) - код просто
-вынесен сюда, чтобы:
-  - не дублироваться между clean.ipynb и models.ipynb;
-  - его можно было покрыть тестами;
-  - им мог пользоваться DVC-пайплайн (dvc.yaml) без запуска ноутбуков вручную.
-
-Реальный граф проекта:
-    data/heart.csv (918, оригинал)
-        -> synthetic.ipynb -> data/heart_synth.csv (3000)
-        -> clean.ipynb / prepare_data() -> data/processed/*.csv
-        -> models.ipynb
-
-Главный принцип: делим на train/test ДО очистки, все "обучаемые" вещи
-(медианы, scaler) считаем только по train и применяем к test через уже
-готовые параметры - так исключается утечка данных.
+Предобработка данных
 """
 
 from pathlib import Path
@@ -25,7 +9,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
-# Колонки, где 0 физически невозможен
+# Колонки, где 0 невозможен
 ZERO_AS_MISSING_COLS = ["Cholesterol", "RestingBP"]
 
 # Числовые колонки, которые масштабируем
@@ -38,17 +22,12 @@ TARGET_COL = "HeartDisease"
 
 
 def compute_medians(X_train: pd.DataFrame) -> dict:
-    """Считает медианы по train, игнорируя нули (скрытые пропуски)"""
+    """Считает медианы по train, игнорируя нули"""
     return {col: X_train[col].replace(0, np.nan).median() for col in ZERO_AS_MISSING_COLS}
 
 
 def clean(part: pd.DataFrame, medians: dict) -> pd.DataFrame:
-    """Заменяет скрытые пропуски (нули) медианой и обрезает Oldpeak < 0.
-
-    - Cholesterol/RestingBP = 0 физически невозможны у живого человека,
-      это не выбросы, а замаскированные пропуски, поэтому заменяем медианой train.
-    - Oldpeak < 0 - семантическая ошибка измерения, поэтому обрезаем до 0.
-    """
+    """Заменяет скрытые пропуски (нули) медианой и обрезает Oldpeak < 0"""
     part = part.copy()
     for col in ZERO_AS_MISSING_COLS:
         part[col] = part[col].replace(0, np.nan).fillna(medians[col])
@@ -57,13 +36,7 @@ def clean(part: pd.DataFrame, medians: dict) -> pd.DataFrame:
 
 
 def encode(part: pd.DataFrame) -> pd.DataFrame:
-    """Кодирует категориальные признаки.
-
-    - Sex, ExerciseAngina - бинарные -> 0/1.
-    - ST_Slope - порядковый признак (Up лучше Flat лучше Down) -> 0/1/2.
-    - ChestPainType, RestingECG - номинальные -> one-hot (drop_first,
-      dtype=int, чтобы сразу получить 0/1, а не True/False).
-    """
+    """Кодирует категориальные признаки"""
     part = part.copy()
     part["Sex"] = (part["Sex"] == "M").astype(int)
     part["ExerciseAngina"] = (part["ExerciseAngina"] == "Y").astype(int)
@@ -78,21 +51,6 @@ def prepare_data(
     random_state: int = 42,
     save_dir: str | None = None,
 ):
-    """Полный пайплайн:
-    читает CSV -> делит на train/test -> чистит -> кодирует -> масштабирует.
-
-    Параметры:
-
-    csv_path : путь к сырому CSV (в проекте - 'data/heart_synth.csv').
-    ?????????????????????????????????????????????????????????????????????????????????
-    save_dir : если указан (например, 'data/processed'), сохраняет
-        X_train.csv, X_test.csv, y_train.csv, y_test.csv, medians.csv,
-        scaler.csv в том же формате, что и ячейка 38 clean.ipynb -
-        чтобы models.ipynb и DVC-пайплайн могли их читать без изменений.
-
-    Возвращает X_train, X_test, y_train, y_test и параметры преобразований
-    (medians, scaler)
-    """
     df = pd.read_csv(csv_path)
 
     X = df.drop(columns=TARGET_COL)
@@ -123,7 +81,7 @@ def prepare_data(
 
 
 def save_processed(X_train, X_test, y_train, y_test, medians, scaler, save_dir: str):
-    """Сохраняет результат prepare_data на диск - ровно в том формате, что уже используется"""
+    """Сохраняет результат prepare_data на диск"""
     out = Path(save_dir)
     out.mkdir(parents=True, exist_ok=True)
 

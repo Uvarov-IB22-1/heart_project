@@ -1,12 +1,5 @@
 """
-Обучение моделей для heart_project.
-
-Содержит:
-  - train_models: три базовые модели (LogReg, RandomForest, CatBoost);
-  - tune_rf: подбор гиперпараметров RandomForest через GridSearchCV
-    (финальная модель проекта - именно тюнингованный RandomForest,
-    F1 = 0.991 на расширенном датасете);
-  - save_model / load_model: сохранение и загрузка версий модели.
+Обучение моделей
 """
 
 import joblib
@@ -16,7 +9,7 @@ from sklearn.model_selection import GridSearchCV
 
 
 def train_models(X_train, y_train, random_state: int = 42) -> dict:
-    """Обучает три базовые модели и возвращает их в словаре {имя: модель}"""
+    """Обучает три базовые модели и возвращает их в словаре имя: модель"""
     from catboost import CatBoostClassifier
 
     models = {
