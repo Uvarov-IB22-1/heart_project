@@ -1,7 +1,4 @@
-"""Шаг DVC-пайплайна: data/heart_synth.csv -> data/processed/*.csv.
-
-Запуск (из корня heart_project): python -m scripts.run_prepare
-"""
+"""Шаг DVC-пайплайна: data/heart_synth.csv -> data/processed/*.csv."""
 
 from src.preprocessing import prepare_data
 

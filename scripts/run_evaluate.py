@@ -1,11 +1,4 @@
-"""Шаг DVC-пайплайна: models/model.pkl + data/processed -> metrics.json.
-
-Запуск (из корня heart_project): python -m scripts.run_evaluate
-
-metrics.json - специальный формат для DVC (dvc metrics show, dvc metrics
-diff между коммитами/ветками) - так можно сравнивать качество модели
-до/после изменений без открытия ноутбука.
-"""
+"""Шаг DVC-пайплайна: models/model.pkl + data/processed -> metrics.json."""
 
 import json
 

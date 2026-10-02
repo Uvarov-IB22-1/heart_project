@@ -1,7 +1,4 @@
-"""Шаг DVC-пайплайна: data/heart.csv -> data/heart_synth.csv.
-
-Запуск (из корня heart_project): python -m scripts.run_synthetic
-"""
+"""Шаг DVC-пайплайна: data/heart.csv -> data/heart_synth.csv."""
 
 from src.synthetic import generate_synthetic_data
 

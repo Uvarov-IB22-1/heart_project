@@ -1,10 +1,4 @@
-"""Шаг DVC-пайплайна: data/processed/*.csv -> models/model.pkl.
-
-Запуск (из корня heart_project): python -m scripts.run_train
-
-Обучает и тюнингует RandomForest через GridSearchCV (src.train.tune_rf) -
-это финальная модель проекта - и сохраняет её через joblib.
-"""
+"""Шаг DVC-пайплайна: data/processed/*.csv -> models/model.pkl."""
 
 from src.preprocessing import load_processed
 from src.train import save_model, tune_rf
