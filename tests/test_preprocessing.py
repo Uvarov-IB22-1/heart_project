@@ -1,7 +1,5 @@
 """
-Тесты для src/preprocessing.py.
-
-Запуск: pytest tests/ -v   (из корня heart_project)
+Тесты для src/preprocessing.py
 """
 
 from pathlib import Path
@@ -16,8 +14,7 @@ from src.preprocessing import clean, compute_medians, encode, prepare_data
 @pytest.fixture
 def raw_part() -> pd.DataFrame:
     """Реалистичный кусок данных с проблемами, которые
-    должна чинить clean(): нули в Cholesterol/RestingBP (скрытые
-    пропуски) и отрицательный Oldpeak (ошибка измерения)."""
+    должна чинить clean(): нули в Cholesterol/RestingBP и отрицательный Oldpeak"""
     return pd.DataFrame(
         {
             "Age": [40, 49, 37, 54],
@@ -42,7 +39,7 @@ def medians(raw_part) -> dict:
 
 def test_compute_medians_ignores_zeros(raw_part):
     """Нули не должны попадать в расчёт медианы - иначе медиана будет
-    занижена самими же пропусками, которые она призвана исправлять."""
+    занижена самими же пропусками, которые она призвана исправлять"""
     medians = compute_medians(raw_part)
     # RestingBP без нуля: [140, 130, 150] -> медиана 140
     assert medians["RestingBP"] == 140
@@ -50,20 +47,17 @@ def test_compute_medians_ignores_zeros(raw_part):
     assert medians["Cholesterol"] == 195
 
 
-# ---------- clean ----------
 
 
 def test_clean_removes_zeros(raw_part, medians):
-    """После clean() в Cholesterol/RestingBP не должно остаться нулей -
-    это и есть контракт функции, независимо от того, какая именно
-    медиана была посчитана."""
+    """После clean() в Cholesterol/RestingBP не должно остаться нулей"""
     result = clean(raw_part, medians)
     assert (result["Cholesterol"] != 0).all()
     assert (result["RestingBP"] != 0).all()
 
 
 def test_clean_fills_zero_with_train_median(raw_part, medians):
-    """Проверяем, что подставляется именно заранее переданная медиана train."""
+    """Проверяем, что подставляется именно заранее переданная медиана train"""
     result = clean(raw_part, medians)
     # строка 1: RestingBP был 0 -> должен стать medians['RestingBP']
     assert result.loc[1, "RestingBP"] == medians["RestingBP"]
@@ -72,7 +66,7 @@ def test_clean_fills_zero_with_train_median(raw_part, medians):
 
 
 def test_clean_clips_negative_oldpeak(raw_part, medians):
-    """Oldpeak < 0 физически невозможен -> после clean() должен быть 0."""
+    """Oldpeak < 0 физически невозможен, поэтому после clean() должен быть 0"""
     result = clean(raw_part, medians)
     assert (result["Oldpeak"] >= 0).all()
     assert result.loc[2, "Oldpeak"] == 0
@@ -84,8 +78,6 @@ def test_clean_does_not_mutate_input(raw_part, medians):
     clean(raw_part, medians)
     pd.testing.assert_frame_equal(raw_part, original)
 
-
-# encode
 
 
 def test_encode_produces_only_numeric_columns(raw_part, medians):
@@ -110,9 +102,6 @@ def test_encode_ordinal_st_slope(raw_part, medians):
     assert result.loc[1, "ST_Slope"] == 1  # было 'Flat'
 
 
-# ---------- prepare_data (полный пайплайн) ----------
-
-
 def test_prepare_data_no_nan(tmp_path):
     """После полного пайплайна не должно остаться NaN - ни в train, ни в test"""
     csv_path = _make_synthetic_csv(tmp_path, n=200)
@@ -129,11 +118,7 @@ def test_prepare_data_train_test_same_columns(tmp_path):
 
 
 def test_prepare_data_clean_step_clips_oldpeak(tmp_path):
-    """Oldpeak >= 0 - контракт clean(), а не prepare_data() целиком:
-    после StandardScaler внутри prepare_data() Oldpeak центрируется
-    к среднему и закономерно становится отрицательным у части строк.
-    Поэтому здесь читаем CSV и проверяем clean() напрямую, до масштабирования.
-    """
+    """Читаем CSV и проверяем clean() напрямую, до масштабирования"""
     df = pd.read_csv(_make_synthetic_csv(tmp_path, n=200))
     X = df.drop(columns="HeartDisease")
     medians = compute_medians(X)
@@ -159,8 +144,7 @@ def test_prepare_data_saves_processed_files(tmp_path):
 
 
 def _make_synthetic_csv(tmp_path, n: int = 200) -> Path:
-    """Генерирует небольшой валидный CSV с той же схемой, что и
-    heart_synth.csv"""
+    """Генерирует небольшой валидный CSV с той же схемой, что и heart_synth.csv"""
     rng = np.random.default_rng(42)
     df = pd.DataFrame(
         {
