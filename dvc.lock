@@ -9,12 +9,12 @@ stages:
       size: 35921
     - path: scripts/run_synthetic.py
       hash: md5
-      md5: 73e6adfba797279a669ca9adf9334aab
-      size: 480
+      md5: 420045bd2b8fdb8270ce088fcf54c281
+      size: 400
     - path: src/synthetic.py
       hash: md5
-      md5: d6c07f88822bf7ce5351715273aea675
-      size: 3378
+      md5: e5c5c221db9c2c12aae52b41fa96ccb6
+      size: 1945
     outs:
     - path: data/heart_synth.csv
       hash: md5
@@ -29,12 +29,12 @@ stages:
       size: 120690
     - path: scripts/run_prepare.py
       hash: md5
-      md5: ea31997bdf175d565d48803ed7c4bd34
-      size: 513
+      md5: da12ea13b15b5c33aca0eedceab9058a
+      size: 435
     - path: src/preprocessing.py
       hash: md5
-      md5: 8d207e4649a38775e6b4e6bf154f54b7
-      size: 7813
+      md5: da406c073d269fe02b489a875f1a5082
+      size: 3828
     outs:
     - path: data/processed/X_test.csv
       hash: md5
@@ -73,12 +73,12 @@ stages:
       size: 4813
     - path: scripts/run_train.py
       hash: md5
-      md5: c3cd2fad8ca01915ba57c423b8b72d13
-      size: 986
+      md5: 4921216cebf978e4936b3e454b83efe9
+      size: 707
     - path: src/train.py
       hash: md5
-      md5: c39802346a6cd29ae092db44485a6a87
-      size: 3734
+      md5: e3dbe67c13f5084b0df345bee2d870d9
+      size: 1930
     outs:
     - path: models/model.pkl
       hash: md5
@@ -101,14 +101,46 @@ stages:
       size: 3626313
     - path: scripts/run_evaluate.py
       hash: md5
-      md5: e3d56b3c38069eec9f64686f20618337
-      size: 1170
+      md5: 3bf084380e387e090183e9adddaf22f6
+      size: 794
     - path: src/evaluate.py
       hash: md5
-      md5: 4c2713882ae15967887475f950ac51b8
-      size: 2591
+      md5: 7dafa96d0e90fcb2630c2c096a1e2572
+      size: 1857
     outs:
     - path: metrics.json
       hash: md5
       md5: 04bafd317145d3cfc6799e7bef8a2acf
       size: 126
+  compare:
+    cmd: python -m scripts.run_compare
+    deps:
+    - path: data/processed/X_test.csv
+      hash: md5
+      md5: d24974c783ea17edca6c02fdc21ce041
+      size: 69881
+    - path: data/processed/X_train.csv
+      hash: md5
+      md5: 0410e61f1e9dd7807819300b2f37dc8e
+      size: 279006
+    - path: data/processed/y_test.csv
+      hash: md5
+      md5: dc744eb2c2842870643eed628f5ebdaa
+      size: 1213
+    - path: data/processed/y_train.csv
+      hash: md5
+      md5: 6f51d0a5adf0705a49eb7351f7387708
+      size: 4813
+    - path: scripts/run_compare.py
+      hash: md5
+      md5: 49980e9e358b57e4df03d3c90cc9b379
+      size: 845
+    - path: src/compare_models.py
+      hash: md5
+      md5: b8442c8df682db57c756f28bca0405be
+      size: 2156
+    outs:
+    - path: models/comparison_table.csv
+      hash: md5
+      md5: ffa0ea7eece5cb7069e0956b01230d20
+      size: 233

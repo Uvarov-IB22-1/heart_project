@@ -22,6 +22,18 @@ stages:
       - data/processed/medians.csv
       - data/processed/scaler.csv
 
+  compare:
+    cmd: python -m scripts.run_compare
+    deps:
+      - data/processed/X_train.csv
+      - data/processed/X_test.csv
+      - data/processed/y_train.csv
+      - data/processed/y_test.csv
+      - src/compare_models.py
+      - scripts/run_compare.py
+    outs:
+      - models/comparison_table.csv
+
   train:
     cmd: python -m scripts.run_train
     deps:
